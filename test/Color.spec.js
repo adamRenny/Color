@@ -207,13 +207,13 @@ describe('Color', function() {
             });
 
             it('should calculate the HSL value', function() {
-                var calcMethod = Color.prototype.calcRGBToHSL;
-                spyOn(Color.prototype, 'calcRGBToHSL');
+                var calcMethod = Color.prototype.calcHSLFromRGB;
+                spyOn(Color.prototype, 'calcHSLFromRGB');
 
                 color = new Color('#AABBCCDD');
-                expect(color.calcRGBToHSL).toHaveBeenCalled();
+                expect(color.calcHSLFromRGB).toHaveBeenCalled();
 
-                Color.prototype.calcRGBToHSL = calcMethod;
+                Color.prototype.calcHSLFromRGB = calcMethod;
             });
         });
 
@@ -275,13 +275,13 @@ describe('Color', function() {
             });
 
             it('should calculate the HSL value', function() {
-                var calcMethod = Color.prototype.calcRGBToHSL;
-                spyOn(Color.prototype, 'calcRGBToHSL');
+                var calcMethod = Color.prototype.calcHSLFromRGB;
+                spyOn(Color.prototype, 'calcHSLFromRGB');
 
                 color = new Color('rgba(56, 38.2, 12, 0.354)');
-                expect(color.calcRGBToHSL).toHaveBeenCalled();
+                expect(color.calcHSLFromRGB).toHaveBeenCalled();
 
-                Color.prototype.calcRGBToHSL = calcMethod;
+                Color.prototype.calcHSLFromRGB = calcMethod;
             });
         });
 
@@ -343,13 +343,13 @@ describe('Color', function() {
             });
 
             it('should calculate the RGB value', function() {
-                var calcMethod = Color.prototype.calcHSLToRGB;
-                spyOn(Color.prototype, 'calcHSLToRGB');
+                var calcMethod = Color.prototype.calcRGBFromHSL;
+                spyOn(Color.prototype, 'calcRGBFromHSL');
 
                 color = new Color('hsla(45, 0.234%, 12%, 0.65)');
-                expect(color.calcHSLToRGB).toHaveBeenCalled();
+                expect(color.calcRGBFromHSL).toHaveBeenCalled();
 
-                Color.prototype.calcHSLToRGB = calcMethod;
+                Color.prototype.calcRGBFromHSL = calcMethod;
             });
         });
 
@@ -410,7 +410,7 @@ describe('Color', function() {
         });
     });
 
-    describe('#calcRGBToHSL', function() {
+    describe('#calcHSLFromRGB', function() {
         // HSL calculation has a heavy precision loss in JS
         var precision = 0.1;
         it('should calculate the HSL value from an RGB value with a saturation', function() {
@@ -418,7 +418,7 @@ describe('Color', function() {
             color._red = 255;
             color._green = 245;
             color._blue = 255;
-            color.calcRGBToHSL();
+            color.calcHSLFromRGB();
 
             expect(
                 color.hue
@@ -445,7 +445,7 @@ describe('Color', function() {
             color._red = 200;
             color._green = 100;
             color._blue = 35;
-            color.calcRGBToHSL();
+            color.calcHSLFromRGB();
 
             expect(
                 color.hue
@@ -472,7 +472,7 @@ describe('Color', function() {
             color._red = 23;
             color._green = 0;
             color._blue = 216;
-            color.calcRGBToHSL();
+            color.calcHSLFromRGB();
 
             expect(
                 color.hue
@@ -501,7 +501,7 @@ describe('Color', function() {
             color._red = 255;
             color._green = 255;
             color._blue = 255;
-            color.calcRGBToHSL();
+            color.calcHSLFromRGB();
 
             expect(
                 color.hue
@@ -528,7 +528,7 @@ describe('Color', function() {
             color._red = 100;
             color._green = 100;
             color._blue = 100;
-            color.calcRGBToHSL();
+            color.calcHSLFromRGB();
 
             expect(
                 color.hue
@@ -555,7 +555,7 @@ describe('Color', function() {
             color._red = 35;
             color._green = 35;
             color._blue = 35;
-            color.calcRGBToHSL();
+            color.calcHSLFromRGB();
 
             expect(
                 color.hue
@@ -580,14 +580,14 @@ describe('Color', function() {
         });
     });
 
-    describe('#calcHSLToRGB', function() {
+    describe('#calcRGBFromHSL', function() {
         var precision = 0.1;
         it('should calculate the RGB value from an HSL value with a saturation', function() {
             color = new Color();
             color._hue = 300;
             color._saturation = 1;
             color._lightness = 0.98;
-            color.calcHSLToRGB();
+            color.calcRGBFromHSL();
 
             expect(
                 color.red
@@ -614,19 +614,19 @@ describe('Color', function() {
             color._hue = 24;
             color._saturation = 0.7;
             color._lightness = 0.46;
-            color.calcHSLToRGB();
+            color.calcRGBFromHSL();
 
             expect(
                 color.red
             ).toBeCloseTo(
-                200,
+                199,
                 precision
             );
 
             expect(
                 color.green
             ).toBeCloseTo(
-                100,
+                101,
                 precision
             );
 
@@ -641,12 +641,12 @@ describe('Color', function() {
             color._hue = 246;
             color._saturation = 1;
             color._lightness = 0.42;
-            color.calcHSLToRGB();
+            color.calcRGBFromHSL();
 
             expect(
                 color.red
             ).toBeCloseTo(
-                23,
+                21,
                 precision
             );
 
@@ -660,7 +660,7 @@ describe('Color', function() {
             expect(
                 color.blue
             ).toBeCloseTo(
-                216,
+                214,
                 precision
             );
         });
@@ -670,7 +670,7 @@ describe('Color', function() {
             color._hue = 0;
             color._saturation = 0;
             color._lightness = 1;
-            color.calcHSLToRGB();
+            color.calcRGBFromHSL();
 
             expect(
                 color.red
@@ -697,7 +697,7 @@ describe('Color', function() {
             color._hue = 0;
             color._saturation = 0;
             color._lightness = 0.39;
-            color.calcHSLToRGB();
+            color.calcRGBFromHSL();
 
             expect(
                 color.red
@@ -724,7 +724,7 @@ describe('Color', function() {
             color._hue = 0;
             color._saturation = 0;
             color._lightness = 0.14;
-            color.calcHSLToRGB();
+            color.calcRGBFromHSL();
 
             expect(
                 color.red
@@ -1121,4 +1121,245 @@ describe('Color', function() {
         });
     });
 
+    // RGB
+    var RGB = [
+        'red',
+        'green',
+        'blue'
+    ];
+
+    for (var i = 0; i < RGB.length; i++) {
+        (function(type) {
+            describe('.' + type, function() {
+                beforeEach(function() {
+                    color = new Color();
+                });
+
+                it('should set the value from a number', function() {
+                    color[type] = 2;
+                    expect(color[type]).toBe(2);
+
+                    color[type] = 0.245;
+                    expect(color[type]).toBe(0.245);
+                });
+
+                it('should pull the number from a string', function() {
+                    color[type] = '245';
+                    expect(color[type]).toBe(245);
+                });
+
+                it('should set the value to 0 if provided an invalid type', function() {
+                    color[type] = function() {};
+                    expect(color[type]).toBe(0);
+
+                    color[type] = true;
+                    expect(color[type]).toBe(0);
+
+                    color[type] = false;
+                    expect(color[type]).toBe(0);
+
+                    color[type] = 'happy';
+                    expect(color[type]).toBe(0);
+
+                    color[type] = {};
+                    expect(color[type]).toBe(0);
+                });
+
+                it('should clamp to be within 0', function() {
+                    color[type] = -24;
+
+                    expect(color[type]).toBe(0);
+
+                    color[type] = -0.0002345;
+
+                    expect(color[type]).toBe(0);
+
+                    color[type] = -2031947189247;
+
+                    expect(color[type]).toBe(0);
+                });
+
+                it('should clamp to be within 255', function() {
+                    color[type] = 255;
+
+                    expect(color[type]).toBe(255);
+
+                    color[type] = 3666;
+
+                    expect(color[type]).toBe(255);
+
+                    color[type] = 255.57;
+
+                    expect(color[type]).toBe(255);
+                });
+
+                it('should calculate the HSL value', function() {
+                    spyOn(color, 'calcHSLFromRGB');
+                    expect(color.calcHSLFromRGB).not.toHaveBeenCalled();
+
+                    color[type] = 24;
+                    expect(color.calcHSLFromRGB).toHaveBeenCalled();
+                });
+            });
+        }(RGB[i]));
+    }
+
+    describe('.hue', function() {
+        beforeEach(function() {
+            color = new Color();
+        });
+
+        it('should set the value from a number', function() {
+            color.hue = 2;
+            expect(color.hue).toBe(2);
+
+            color.hue = 0.245;
+            expect(color.hue).toBe(0.245);
+
+            color.hue = 355;
+            expect(color.hue).toBe(355);
+        });
+
+        it('should pull the number from a string', function() {
+            color.hue = '245';
+            expect(color.hue).toBe(245);
+        });
+
+        it('should set the value to 0 if provided an invalid type', function() {
+            color.hue = function() {};
+            expect(color.hue).toBe(0);
+
+            color.hue = true;
+            expect(color.hue).toBe(0);
+
+            color.hue = false;
+            expect(color.hue).toBe(0);
+
+            color.hue = 'happy';
+            expect(color.hue).toBe(0);
+
+            color.hue = {};
+            expect(color.hue).toBe(0);
+        });
+
+        it('should clamp to be within 0', function() {
+            color.hue = -24;
+
+            expect(color.hue).toBe(0);
+
+            color.hue = -0.0002345;
+
+            expect(color.hue).toBe(0);
+
+            color.hue = -2031947189247;
+
+            expect(color.hue).toBe(0);
+        });
+
+        it('should modulo at 360', function() {
+            color.hue = 360;
+            expect(color.hue).toBe(0);
+
+            color.hue = 359.983;
+            expect(color.hue).toBe(359.983);
+
+            color.hue = 423;
+            expect(color.hue).toBe(423 % 360);
+
+            color.hue = 720;
+            expect(color.hue).toBe(0);
+        });
+
+        it('should calculate the RGB value', function() {
+            spyOn(color, 'calcRGBFromHSL');
+            expect(color.calcRGBFromHSL).not.toHaveBeenCalled();
+
+            color.hue = 24;
+            expect(color.calcRGBFromHSL).toHaveBeenCalled();
+        });
+    });
+
+    var PERCENTS = [
+        'alpha',
+        'saturation',
+        'lightness'
+    ];
+
+    for (var i = 0; i < PERCENTS.length; i++) {
+        (function(type) {
+            describe('.' + type, function() {
+                beforeEach(function() {
+                    color = new Color();
+                });
+
+                it('should set the value from a number', function() {
+                    color[type] = 0.5;
+                    expect(color[type]).toBe(0.5);
+
+                    color[type] = 0.245;
+                    expect(color[type]).toBe(0.245);
+                });
+
+                it('should pull the number from a string', function() {
+                    color[type] = '0.2';
+                    expect(color[type]).toBe(0.2);
+                });
+
+                it('should set the value to 0 if provided an invalid type', function() {
+                    color[type] = function() {};
+                    expect(color[type]).toBe(0);
+
+                    color[type] = true;
+                    expect(color[type]).toBe(0);
+
+                    color[type] = false;
+                    expect(color[type]).toBe(0);
+
+                    color[type] = 'happy';
+                    expect(color[type]).toBe(0);
+
+                    color[type] = {};
+                    expect(color[type]).toBe(0);
+                });
+
+                it('should clamp to be within 0', function() {
+                    color[type] = -24;
+
+                    expect(color[type]).toBe(0);
+
+                    color[type] = -0.0002345;
+
+                    expect(color[type]).toBe(0);
+
+                    color[type] = -2031947189247;
+
+                    expect(color[type]).toBe(0);
+                });
+
+                it('should clamp to be within 1', function() {
+                    color[type] = 1;
+
+                    expect(color[type]).toBe(1);
+
+                    color[type] = 0.999;
+
+                    expect(color[type]).toBe(0.999);
+
+                    color[type] = 1.23;
+
+                    expect(color[type]).toBe(1);
+                });
+
+                if (type !== 'alpha') {
+                    it('should calculate the RGB value', function() {
+                        spyOn(color, 'calcRGBFromHSL');
+                        expect(color.calcRGBFromHSL).not.toHaveBeenCalled();
+
+                        color[type] = 0.8;
+                        expect(color.calcRGBFromHSL).toHaveBeenCalled();
+                    });
+                }
+            });
+        }(PERCENTS[i]));
+    }
 });

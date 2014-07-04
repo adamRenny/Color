@@ -386,6 +386,10 @@ window.Color = (function() {
         return value;
     }
 
+    function isValidNumber(value) {
+        return !isNaN(value) && typeof value !== 'boolean';
+    }
+
     function hydrate(str) {
         var type = parseType(str);
         if (type === TYPES.UNKNOWN) {
@@ -435,7 +439,7 @@ window.Color = (function() {
         this._blue = blue;
         this._alpha = alpha;
         validate.call(this);
-        this.calcRGBToHSL();
+        this.calcHSLFromRGB();
     }
 
     function readFromHSL(match) {
@@ -458,7 +462,7 @@ window.Color = (function() {
         this._lightness = lightness;
         this._alpha = alpha;
         validate.call(this);
-        this.calcHSLToRGB();
+        this.calcRGBFromHSL();
     }
 
     function readFromHex(match) {
@@ -503,7 +507,7 @@ window.Color = (function() {
         validate.call(this);
 
         // Calculate the HSL value
-        this.calcRGBToHSL();
+        this.calcHSLFromRGB();
     }
 
     function readFromColor(match) {
@@ -561,7 +565,7 @@ window.Color = (function() {
     }
 
     function convertHSLToRGB() {
-        var hue = this._hue;
+        var hue = this._hue / 360;
         var saturation = this._saturation;
         var lightness = this._lightness;
 
@@ -621,7 +625,7 @@ window.Color = (function() {
 
     function Color(str) {
         if (typeof str !== 'string') {
-            this.calcRGBToHSL();
+            this.calcHSLFromRGB();
             return;
         }
         hydrate.call(this, str);
@@ -664,7 +668,7 @@ window.Color = (function() {
         },
 
         set alpha(value) {
-            if (isNaN(value)) {
+            if (!isValidNumber(value)) {
                 value = 0;
             }
 
@@ -678,14 +682,14 @@ window.Color = (function() {
         },
 
         set red(value) {
-            if (isNaN(value)) {
+            if (!isValidNumber(value)) {
                 value = 0;
             }
 
             value = clamp(parseFloat(value), 0, 255);
 
             this._red = value;
-            this.calcRGBToHSL();
+            this.calcHSLFromRGB();
         },
 
         get green() {
@@ -693,14 +697,14 @@ window.Color = (function() {
         },
 
         set green(value) {
-            if (isNaN(value)) {
+            if (!isValidNumber(value)) {
                 value = 0;
             }
 
             value = clamp(parseFloat(value), 0, 255);
 
             this._green = value;
-            this.calcRGBToHSL();
+            this.calcHSLFromRGB();
         },
 
         get blue() {
@@ -708,14 +712,14 @@ window.Color = (function() {
         },
 
         set blue(value) {
-            if (isNaN(value)) {
+            if (!isValidNumber(value)) {
                 value = 0;
             }
 
             value = clamp(parseFloat(value), 0, 255);
 
             this._blue = value;
-            this.calcRGBToHSL();
+            this.calcHSLFromRGB();
         },
 
         get hue() {
@@ -723,14 +727,18 @@ window.Color = (function() {
         },
 
         set hue(value) {
-            if (isNaN(value)) {
+            if (!isValidNumber(value)) {
+                value = 0;
+            }
+
+            if (value < 0) {
                 value = 0;
             }
 
             value = parseFloat(value) % 360;
 
             this._hue = value;
-            this.calcHSLToRGB();
+            this.calcRGBFromHSL();
         },
 
         get saturation() {
@@ -738,14 +746,14 @@ window.Color = (function() {
         },
 
         set saturation(value) {
-            if (isNaN(value)) {
+            if (!isValidNumber(value)) {
                 value = 0;
             }
 
             value = clamp(parseFloat(value), 0, 1);
 
             this._saturation = value;
-            this.calcHSLToRGB();
+            this.calcRGBFromHSL();
         },
 
         get lightness() {
@@ -753,18 +761,18 @@ window.Color = (function() {
         },
 
         set lightness(value) {
-            if (isNaN(value)) {
+            if (!isValidNumber(value)) {
                 value = 0;
             }
 
             value = clamp(parseFloat(value), 0, 1);
 
             this._lightness = value;
-            this.calcHSLToRGB();
+            this.calcRGBFromHSL();
         },
 
-        calcRGBToHSL: convertRGBToHSL,
-        calcHSLToRGB: convertHSLToRGB
+        calcHSLFromRGB: convertRGBToHSL,
+        calcRGBFromHSL: convertHSLToRGB
     };
 
     Color.parseType = parseType;
