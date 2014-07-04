@@ -1,0 +1,28 @@
+{
+  "name": "Colors",
+  "version": "0.0.0",
+  "description": "Transform HTML5 color strings",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adamRenny/Color.git"
+  },
+  "keywords": [
+    "color",
+    "hsl",
+    "rgb",
+    "rgba",
+    "hsla"
+  ],
+  "author": "Adam Ranfelt <adamRenny@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/adamRenny/Color/issues"
+  },
+  "homepage": "https://github.com/adamRenny/Color",
+  "devDependencies": {
+    "karma": "^0.12.16",
+    "karma-jasmine": "^0.2.2",
+    "phantomjs": "^1.9.7-12"
+  }
+}
