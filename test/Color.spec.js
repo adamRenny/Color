@@ -205,6 +205,16 @@ describe('Color', function() {
                     parseInt('DD', 16)
                 );
             });
+
+            it('should calculate the HSL value', function() {
+                var calcMethod = Color.prototype.calcRGBToHSL;
+                spyOn(Color.prototype, 'calcRGBToHSL');
+
+                color = new Color('#AABBCCDD');
+                expect(color.calcRGBToHSL).toHaveBeenCalled();
+
+                Color.prototype.calcRGBToHSL = calcMethod;
+            });
         });
 
         describe('-hydrateRGB', function() {
@@ -262,6 +272,16 @@ describe('Color', function() {
                 ).toBe(
                     0.354
                 );
+            });
+
+            it('should calculate the HSL value', function() {
+                var calcMethod = Color.prototype.calcRGBToHSL;
+                spyOn(Color.prototype, 'calcRGBToHSL');
+
+                color = new Color('rgba(56, 38.2, 12, 0.354)');
+                expect(color.calcRGBToHSL).toHaveBeenCalled();
+
+                Color.prototype.calcRGBToHSL = calcMethod;
             });
         });
 
@@ -321,6 +341,16 @@ describe('Color', function() {
                     0.65
                 );
             });
+
+            it('should calculate the RGB value', function() {
+                var calcMethod = Color.prototype.calcHSLToRGB;
+                spyOn(Color.prototype, 'calcHSLToRGB');
+
+                color = new Color('hsla(45, 0.234%, 12%, 0.65)');
+                expect(color.calcHSLToRGB).toHaveBeenCalled();
+
+                Color.prototype.calcHSLToRGB = calcMethod;
+            });
         });
 
         describe('-hydrateColors', function() {
@@ -377,6 +407,345 @@ describe('Color', function() {
                     1
                 );
             });
+        });
+    });
+
+    describe('#calcRGBToHSL', function() {
+        // HSL calculation has a heavy precision loss in JS
+        var precision = 0.1;
+        it('should calculate the HSL value from an RGB value with a saturation', function() {
+            color = new Color();
+            color._red = 255;
+            color._green = 245;
+            color._blue = 255;
+            color.calcRGBToHSL();
+
+            expect(
+                color.hue
+            ).toBeCloseTo(
+                300,
+                precision
+            );
+
+            expect(
+                color.saturation
+            ).toBeCloseTo(
+                1,
+                precision
+            );
+
+            expect(
+                color.lightness
+            ).toBeCloseTo(
+                0.98,
+                precision
+            );
+
+            color = new Color();
+            color._red = 200;
+            color._green = 100;
+            color._blue = 35;
+            color.calcRGBToHSL();
+
+            expect(
+                color.hue
+            ).toBeCloseTo(
+                24,
+                precision
+            );
+
+            expect(
+                color.saturation
+            ).toBeCloseTo(
+                0.7,
+                precision
+            );
+
+            expect(
+                color.lightness
+            ).toBeCloseTo(
+                0.46,
+                precision
+            );
+
+            color = new Color();
+            color._red = 23;
+            color._green = 0;
+            color._blue = 216;
+            color.calcRGBToHSL();
+
+            expect(
+                color.hue
+            ).toBeCloseTo(
+                246,
+                precision
+            );
+
+            expect(
+                color.saturation
+            ).toBeCloseTo(
+                1,
+                precision
+            );
+
+            expect(
+                color.lightness
+            ).toBeCloseTo(
+                0.42,
+                precision
+            );
+        });
+
+        it('should calculate the HSL value from an RGB value with no saturation', function() {
+            color = new Color();
+            color._red = 255;
+            color._green = 255;
+            color._blue = 255;
+            color.calcRGBToHSL();
+
+            expect(
+                color.hue
+            ).toBeCloseTo(
+                0,
+                precision
+            );
+
+            expect(
+                color.saturation
+            ).toBeCloseTo(
+                0,
+                precision
+            );
+
+            expect(
+                color.lightness
+            ).toBeCloseTo(
+                1,
+                precision
+            );
+
+            color = new Color();
+            color._red = 100;
+            color._green = 100;
+            color._blue = 100;
+            color.calcRGBToHSL();
+
+            expect(
+                color.hue
+            ).toBeCloseTo(
+                0,
+                precision
+            );
+
+            expect(
+                color.saturation
+            ).toBeCloseTo(
+                0,
+                precision
+            );
+
+            expect(
+                color.lightness
+            ).toBeCloseTo(
+                0.39,
+                precision
+            );
+
+            color = new Color();
+            color._red = 35;
+            color._green = 35;
+            color._blue = 35;
+            color.calcRGBToHSL();
+
+            expect(
+                color.hue
+            ).toBeCloseTo(
+                0,
+                precision
+            );
+
+            expect(
+                color.saturation
+            ).toBeCloseTo(
+                0,
+                precision
+            );
+
+            expect(
+                color.lightness
+            ).toBeCloseTo(
+                0.14,
+                precision
+            );
+        });
+    });
+
+    describe('#calcHSLToRGB', function() {
+        var precision = 0.1;
+        it('should calculate the RGB value from an HSL value with a saturation', function() {
+            color = new Color();
+            color._hue = 300;
+            color._saturation = 1;
+            color._lightness = 0.98;
+            color.calcHSLToRGB();
+
+            expect(
+                color.red
+            ).toBeCloseTo(
+                255,
+                precision
+            );
+
+            expect(
+                color.green
+            ).toBeCloseTo(
+                245,
+                precision
+            );
+
+            expect(
+                color.blue
+            ).toBeCloseTo(
+                255,
+                precision
+            );
+
+            color = new Color();
+            color._hue = 24;
+            color._saturation = 0.7;
+            color._lightness = 0.46;
+            color.calcHSLToRGB();
+
+            expect(
+                color.red
+            ).toBeCloseTo(
+                200,
+                precision
+            );
+
+            expect(
+                color.green
+            ).toBeCloseTo(
+                100,
+                precision
+            );
+
+            expect(
+                color.blue
+            ).toBeCloseTo(
+                35,
+                precision
+            );
+
+            color = new Color();
+            color._hue = 246;
+            color._saturation = 1;
+            color._lightness = 0.42;
+            color.calcHSLToRGB();
+
+            expect(
+                color.red
+            ).toBeCloseTo(
+                23,
+                precision
+            );
+
+            expect(
+                color.green
+            ).toBeCloseTo(
+                0,
+                precision
+            );
+
+            expect(
+                color.blue
+            ).toBeCloseTo(
+                216,
+                precision
+            );
+        });
+
+        it('should calculate the RGB value from an HSL value with no saturation', function() {
+            color = new Color();
+            color._hue = 0;
+            color._saturation = 0;
+            color._lightness = 1;
+            color.calcHSLToRGB();
+
+            expect(
+                color.red
+            ).toBeCloseTo(
+                255,
+                precision
+            );
+
+            expect(
+                color.green
+            ).toBeCloseTo(
+                255,
+                precision
+            );
+
+            expect(
+                color.blue
+            ).toBeCloseTo(
+                255,
+                precision
+            );
+
+            color = new Color();
+            color._hue = 0;
+            color._saturation = 0;
+            color._lightness = 0.39;
+            color.calcHSLToRGB();
+
+            expect(
+                color.red
+            ).toBeCloseTo(
+                99,
+                precision
+            );
+
+            expect(
+                color.green
+            ).toBeCloseTo(
+                99,
+                precision
+            );
+
+            expect(
+                color.blue
+            ).toBeCloseTo(
+                99,
+                precision
+            );
+
+            color = new Color();
+            color._hue = 0;
+            color._saturation = 0;
+            color._lightness = 0.14;
+            color.calcHSLToRGB();
+
+            expect(
+                color.red
+            ).toBeCloseTo(
+                36,
+                precision
+            );
+
+            expect(
+                color.green
+            ).toBeCloseTo(
+                36,
+                precision
+            );
+
+            expect(
+                color.blue
+            ).toBeCloseTo(
+                36,
+                precision
+            );
         });
     });
 

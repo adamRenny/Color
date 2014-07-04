@@ -374,6 +374,18 @@ window.Color = (function() {
     READ_MAP[TYPES.HEX2] = readFromHex;
     READ_MAP[TYPES.LUT] = readFromColor;
 
+    function clamp(value, min, max) {
+        if (value < min) {
+            value = min;
+        }
+
+        if (value > max) {
+            value = max;
+        }
+
+        return value;
+    }
+
     function hydrate(str) {
         var type = parseType(str);
         if (type === TYPES.UNKNOWN) {
@@ -386,6 +398,21 @@ window.Color = (function() {
         }
 
         READ_MAP[type].call(this, match);
+    }
+
+    function validate() {
+        this._red = clamp(this._red, 0, 255);
+        this._green = clamp(this._green, 0, 255);
+        this._blue = clamp(this._blue, 0, 255);
+        this._alpha = clamp(this._alpha, 0, 1);
+
+        if (this._hue < 0) {
+            this._hue = 0;
+        }
+
+        this._hue = this._hue % 360;
+        this._saturation = clamp(this._saturation, 0, 1);
+        this._lightness = clamp(this._lightness, 0, 1);
     }
 
     function readFromRGB(match) {
@@ -407,6 +434,8 @@ window.Color = (function() {
         this._green = green;
         this._blue = blue;
         this._alpha = alpha;
+        validate.call(this);
+        this.calcRGBToHSL();
     }
 
     function readFromHSL(match) {
@@ -428,6 +457,7 @@ window.Color = (function() {
         this._saturation = saturation;
         this._lightness = lightness;
         this._alpha = alpha;
+        validate.call(this);
         this.calcHSLToRGB();
     }
 
@@ -469,6 +499,9 @@ window.Color = (function() {
         this._blue = parseInt(blue, 16);
         this._alpha = parseInt(alpha, 16) / 255;
 
+        // Make sure all values are valid
+        validate.call(this);
+
         // Calculate the HSL value
         this.calcRGBToHSL();
     }
@@ -487,26 +520,39 @@ window.Color = (function() {
         var min = Math.min(red, green, blue);
         var max = Math.max(red, green, blue);
 
+        var dist = max - min;
         var lightness = (min + max) / 2;
 
         var saturation = 0;
         var hue = 0;
         if (min !== max) {
             if (lightness < 0.5) {
-                saturation = (max - min) / (max + min);
+                saturation = dist / (max + min);
             } else {
-                saturation = (max - min) / (2 - max - min);
+                saturation = dist / (2 - max - min);
             }
+
+            var distRed = (((max - red) / 6) + (dist / 2)) / dist;
+            var distGreen = (((max - green) / 6) + (dist / 2)) / dist;
+            var distBlue = (((max - blue) / 6) + (dist / 2)) / dist;
 
             if (max === red) {
-                hue = (green - blue) / (max - min);
+                hue = distBlue - distGreen;
             } else if (max === green) {
-                hue = 2 + (blue - red) / (max - min);
+                hue = (1/3) + distRed - distBlue;
             } else if (max === blue) {
-                hue = 4 + (red - green) / (max - min);
+                hue = (2/3) + distGreen - distRed;
             }
 
-            hue = hue * 60;
+            if (hue < 0) {
+                hue = hue + 1;
+            }
+
+            if (hue > 1) {
+                hue = hue - 1;
+            }
+
+            hue = hue * 360;
         }
 
         this._hue = hue;
@@ -524,12 +570,53 @@ window.Color = (function() {
         var blue = 0;
 
         if (saturation === 0) {
-            red = lightness * 255;
-            green = lightness * 255;
-            blue = lightness * 255;
+            red = lightness;
+            green = lightness;
+            blue = lightness;
         } else {
+            var val1;
+            var val2;
 
+            if (lightness < 0.5) {
+                val2 = lightness * (1 + saturation);
+            } else {
+                val2 = (lightness + saturation) - (saturation * lightness);
+            }
+
+            val1 = 2 * lightness - val2;
+
+            red = transformHueIntoColor(val1, val2, hue + (1/3));
+            green = transformHueIntoColor(val1, val2, hue);
+            blue = transformHueIntoColor(val1, val2, hue - (1/3));
         }
+
+        this._red = Math.round(red * 255);
+        this._green = Math.round(green * 255);
+        this._blue = Math.round(blue * 255);
+    }
+
+    function transformHueIntoColor(val1, val2, hueVal) {
+        if (hueVal < 0) {
+            hueVal = hueVal + 1;
+        }
+
+        if (hueVal > 1) {
+            hueVal = hueVal - 1;
+        }
+
+        if ((6 * hueVal) < 1) {
+            return val1 + (val2 - val1) * 6 * hueVal;
+        }
+
+        if ((2 * hueVal) < 1) {
+            return val2;
+        }
+
+        if ((3 * hueVal) < 2) {
+            return val1 + (val2 - val1) * ((2/3) - hueVal) * 6;
+        }
+
+        return val1;
     }
 
     function Color(str) {
@@ -577,6 +664,12 @@ window.Color = (function() {
         },
 
         set alpha(value) {
+            if (isNaN(value)) {
+                value = 0;
+            }
+
+            value = clamp(parseFloat(value), 0, 1);
+
             this._alpha = value;
         },
 
@@ -585,6 +678,12 @@ window.Color = (function() {
         },
 
         set red(value) {
+            if (isNaN(value)) {
+                value = 0;
+            }
+
+            value = clamp(parseFloat(value), 0, 255);
+
             this._red = value;
             this.calcRGBToHSL();
         },
@@ -594,6 +693,12 @@ window.Color = (function() {
         },
 
         set green(value) {
+            if (isNaN(value)) {
+                value = 0;
+            }
+
+            value = clamp(parseFloat(value), 0, 255);
+
             this._green = value;
             this.calcRGBToHSL();
         },
@@ -603,6 +708,12 @@ window.Color = (function() {
         },
 
         set blue(value) {
+            if (isNaN(value)) {
+                value = 0;
+            }
+
+            value = clamp(parseFloat(value), 0, 255);
+
             this._blue = value;
             this.calcRGBToHSL();
         },
@@ -612,6 +723,12 @@ window.Color = (function() {
         },
 
         set hue(value) {
+            if (isNaN(value)) {
+                value = 0;
+            }
+
+            value = parseFloat(value) % 360;
+
             this._hue = value;
             this.calcHSLToRGB();
         },
@@ -621,6 +738,12 @@ window.Color = (function() {
         },
 
         set saturation(value) {
+            if (isNaN(value)) {
+                value = 0;
+            }
+
+            value = clamp(parseFloat(value), 0, 1);
+
             this._saturation = value;
             this.calcHSLToRGB();
         },
@@ -630,6 +753,12 @@ window.Color = (function() {
         },
 
         set lightness(value) {
+            if (isNaN(value)) {
+                value = 0;
+            }
+
+            value = clamp(parseFloat(value), 0, 1);
+
             this._lightness = value;
             this.calcHSLToRGB();
         },
