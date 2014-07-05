@@ -1,7 +1,67 @@
-window.Color = (function() {
+/**
+ * The MIT License
+ *
+ * Copyright (c) 2014 Adam Ranfelt
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge,
+ * publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+ * OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+// Using UMD from https://github.com/umdjs/umd/blob/master/returnExports.js
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([], factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        // Browser globals (root is window)
+        root.Color = factory();
+    }
+}(this, function factory() {
     'use strict';
 
-    // Collection of color types
+    /**
+     * List of possible color space types
+     * Used to reference the type after parsing
+     *  For pushing into toString for convenience
+     *
+     *  Possible list of types:
+     *    HSL - Hue Saturation Lightness Colorspace name for hsl(h, s%, l%)
+     *    HSLA - Hue Saturation Lightness Alpha Colorspace name for hsla(h, s%, l%, a)
+     *    RGB - Red Green Blue Colorspace name for rgb(r, g, b)
+     *    RGBA - Red Green Blue Alpha Colorspace name for rgba(r, g, b, a)
+     *    HEX - Hexadecimal Single-Char Colorspace name for #RGB, #ARGB
+     *    HEX2 - Hexadecimal Single-Char Colorspace name for #RRGGBB, #AARRGGBB
+     *    LUT - Lookup Colorspace name for single-term colors
+     *    UNKNOWN - Non-colorspace
+     *
+     * @private
+     * @static
+     * @for Color
+     * @property TYPES
+     * @types {object}
+     * @final
+     */
     var TYPES = {
         HSL: 'hsl',
         HSLA: 'hsla',
@@ -13,19 +73,120 @@ window.Color = (function() {
         UNKNOWN: 'unknown'
     };
 
-    // Create the REGEX phrases
+    /**
+     * Regex Calculation
+     *
+     * Dynamically generate all calculations
+     * reusing components
+     *
+     * @TODO: Needs to be refactored to reduce the number of objects and references
+     **/
+
+    /**
+     * Regex snippet to match a number or a number with floating point
+     *
+     * @private
+     * @for Color
+     * @property FLOAT_NUMBER
+     * @type {string}
+     * @final
+     */
     var FLOAT_NUMBER = '\\d+(?:\\.\\d+)?';
+
+    /**
+     * Regex snippet to match any number of spaces
+     *
+     * @private
+     * @for Color
+     * @property SPACES
+     * @type {string}
+     * @final
+     */
     var SPACES = '\\s*';
+
+    /**
+     * Regex snippet to match a hex character
+     *
+     * @private
+     * @for Color
+     * @property HEX_CHAR
+     * @type {string}
+     * @final
+     */ 
     var HEX_CHAR = '[0-9A-Fa-f]';
 
+    /**
+     * Regex Phrases used to parse out the CSS3 colors
+     * Contains reusable strings for referencing specific types of regex snippets
+     *
+     * @private
+     * @for Color
+     * @namespace PHRASES
+     * @final
+     */
     var PHRASES = {
+
+        /**
+         * Regex phrase for a decimal value with any number of spaces around it
+         * Captures the value
+         *
+         * @private
+         * @for PHRASES
+         * @property DECIMAL
+         * @type {string}
+         * @final
+         */
         DECIMAL: SPACES + '(' + FLOAT_NUMBER + ')' + SPACES,
+
+        /**
+         * Regex phrase for a percentage value with any number of spaces around it
+         * Captures the value
+         *
+         * @private
+         * @for PHRASES
+         * @property PERCENTAGE
+         * @type {string}
+         * @final
+         */
         PERCENTAGE: SPACES + '(' + FLOAT_NUMBER + ')\\%' + SPACES,
+
+        /**
+         * Regex phrase for a 2-character hexadecimal value with any number of spaces around it
+         * Captures the value
+         *
+         * @private
+         * @for PHRASES
+         * @property HEX_TUPLE
+         * @type {string}
+         * @final
+         */
         HEX_TUPLE: '(' + HEX_CHAR + '{2})',
+
+        /**
+         * Regex phrase for a 2-character hexadecimal value with any number of spaces around it
+         * Captures the value
+         *
+         * @private
+         * @for PHRASES
+         * @property HEX_TUPLE
+         * @type {string}
+         * @final
+         */
         HEX: '(' + HEX_CHAR + ')'
     };
 
-    // List of regex to parse colors with
+    /**
+     * Collection of CSS specific regex
+     * Used to parse out each of the namespaces
+     * Captures the values for each
+     * Regex used are more forgiving than CSS (permits spaces and decimals)
+     *
+     * @private
+     * @for Color
+     * @property PARSER
+     * @type {object}
+     * @final
+     */
     var PARSER = {
         HSL: new RegExp('^hsl\\(' + PHRASES.DECIMAL + ',' + PHRASES.PERCENTAGE + ',' + PHRASES.PERCENTAGE + '\\)$'),
         HSLA: new RegExp('^hsla\\(' + PHRASES.DECIMAL + ',' + PHRASES.PERCENTAGE + ',' + PHRASES.PERCENTAGE + ',' + PHRASES.DECIMAL + '\\)$'),
@@ -37,6 +198,16 @@ window.Color = (function() {
     };
 
     // Create color type maps to dynamically reference the parsers
+    /**
+     * Map of parsers
+     * Unifies the TYPE content to the regex used to parse its language
+     *
+     * @private
+     * @for Color
+     * @property PARSER_MAP
+     * @type {object}
+     * @final
+     */
     var PARSER_MAP = {};
     PARSER_MAP[TYPES.HSL] = PARSER.HSL;
     PARSER_MAP[TYPES.HSLA] = PARSER.HSLA;
@@ -46,6 +217,17 @@ window.Color = (function() {
     PARSER_MAP[TYPES.HEX2] = PARSER.HEX2;
     PARSER_MAP[TYPES.LUT] = PARSER.LUT;
 
+    /**
+     * Map of toString functions
+     * Unifies the TYPE content to the respective toString method
+     * Used to render out the CSS string
+     *
+     * @private
+     * @for Color
+     * @property STRING_MAP
+     * @type {object}
+     * @final
+     */
     var STRING_MAP = {};
     STRING_MAP[TYPES.HSL] = toHSLString;
     STRING_MAP[TYPES.HSLA] = toHSLAString;
@@ -54,7 +236,27 @@ window.Color = (function() {
     STRING_MAP[TYPES.HEX] = toHexString;
     STRING_MAP[TYPES.HEX2] = toHexString;
 
-    // Use a parser list to control order of operations
+    /**
+     * Ordered list of REGEX and TYPE Pairs
+     * Used to designate the parse order when a string is hydrated
+     *
+     * Parse objects come with a REGEX and TYPE
+     *
+     * Order is:
+     *  HSL
+     *  HSLA
+     *  RGB
+     *  RGBA
+     *  HEX-Tuple
+     *  HEX
+     *  Color
+     *
+     * @private
+     * @for Color
+     * @property PARSER_LIST
+     * @type {object[]}
+     * @final
+     */
     var PARSER_LIST = [
         {
             REGEX: PARSER.HSL,
@@ -86,7 +288,19 @@ window.Color = (function() {
         }
     ];
 
-    // Use a color list to incorporate the colors
+    /**
+     * List of color strings from the CSS list
+     * Used to verify whether a color is available
+     * @see Extended Color Keywords http://www.w3.org/TR/css3-color/#html4
+     *
+     * @TODO: Refactor to merge with the COLOR_MAP
+     *
+     * @private
+     * @for Color
+     * @property COLOR_LIST
+     * @type {string[]}
+     * @final
+     */
     var COLOR_LIST = [
         'aliceblue',
         'antiquewhite',
@@ -230,6 +444,18 @@ window.Color = (function() {
         'yellowgreen'
     ];
 
+    /**
+     * Map of color strings from the CSS list to rgb values
+     * Used to translate a color to an rgb value
+     *
+     * @TODO: Refactor to merge with the COLOR_LIST
+     *
+     * @private
+     * @for Color
+     * @property COLOR_MAP
+     * @type {object}
+     * @final
+     */
     var COLOR_MAP = {
         aliceblue: 'rgb(240, 248, 255)',
         antiquewhite: 'rgb(250, 235, 215)',
@@ -373,6 +599,16 @@ window.Color = (function() {
         yellowgreen: 'rgb(154, 205, 50)'
     };
 
+    /**
+     * Local private read method
+     * Maps a colorspace type to a regex-match reading function
+     *
+     * @private
+     * @for Color
+     * @property READ_MAP
+     * @type {object}
+     * @final
+     */
     var READ_MAP = {};
     READ_MAP[TYPES.HSL] = readFromHSL;
     READ_MAP[TYPES.HSLA] = readFromHSL;
@@ -382,6 +618,19 @@ window.Color = (function() {
     READ_MAP[TYPES.HEX2] = readFromHex;
     READ_MAP[TYPES.LUT] = readFromColor;
 
+    /**
+     * Clamp method similar to HLSL clamp method
+     * Confines a value to be within the minimum and maximum
+     * Does not handle values outside of the min/max
+     *
+     * @private
+     * @for Color
+     * @method clamp
+     * @param {number} value Value to clamp
+     * @param {number} min Minimum value to clamp to
+     * @param {number} max Maximum value to clamp to
+     * @return {number}
+     */
     function clamp(value, min, max) {
         if (value < min) {
             value = min;
@@ -394,10 +643,32 @@ window.Color = (function() {
         return value;
     }
 
+    /**
+     * Check for a variable to determine whether it is a valid number
+     * Will return true if the value is a number, and not NaN
+     *
+     * @private
+     * @for Color
+     * @method isValidNumber
+     * @param {*} value Value to check whether it is a number
+     * @return {boolean}
+     */
     function isValidNumber(value) {
         return !isNaN(value) && typeof value !== 'boolean';
     }
 
+    /**
+     * Hydration method
+     * Used to direct the parsing logic into the proper reading method
+     * Uses the READ_MAP, and REGEX to transfer the match to the appropriate match method
+     *
+     * @throws TypeError if the color string is identified as valid, but not aactually valid color string
+     * Should never occur
+     *
+     * @for Color
+     * @method hydrate
+     * @param {string} str Color string to hydrate with
+     */
     function hydrate(str) {
         var type = parseType(str);
         if (type === TYPES.UNKNOWN) {
@@ -412,6 +683,14 @@ window.Color = (function() {
         READ_MAP[type].call(this, match);
     }
 
+    /**
+     * Validation method to clamp and push content of the rgb and hsl properties
+     * Called only after read to make sure that all content is properly processed
+     *
+     * @private
+     * @for Color
+     * @method validate
+     */
     function validate() {
         this._red = clamp(this._red, 0, 255);
         this._green = clamp(this._green, 0, 255);
@@ -427,6 +706,15 @@ window.Color = (function() {
         this._lightness = clamp(this._lightness, 0, 1);
     }
 
+    /**
+     * Reads the values from a rgb or rgba string
+     * Parses out a match with 3 or 4 items in it
+     *
+     * @private
+     * @for Color
+     * @method readFromRGB
+     * @param {string[]} match RegExp matched from rgb or rgba
+     */
     function readFromRGB(match) {
         var red = match[1];
         var green = match[2];
@@ -450,6 +738,15 @@ window.Color = (function() {
         this.calcHSLFromRGB();
     }
 
+    /**
+     * Reads the values from a hsl or hsla string
+     * Parses out a match with 3 or 4 items in it
+     *
+     * @private
+     * @for Color
+     * @method readFromHSL
+     * @param {string[]} match RegExp matched from hsl or hsla
+     */
     function readFromHSL(match) {
         var hue = match[1];
         var saturation = match[2];
@@ -469,10 +766,24 @@ window.Color = (function() {
         this._saturation = saturation;
         this._lightness = lightness;
         this._alpha = alpha;
+
+        // Validate the content
         validate.call(this);
+
+        // Calculate the HSL
         this.calcRGBFromHSL();
     }
 
+    /**
+     * Reads the values from a hex string
+     * Parses out a match with 3 or 4 items in it
+     * Uses the same method for both tuples and non-tuples
+     *
+     * @private
+     * @for Color
+     * @method readFromHex
+     * @param {string[]} match RegExp matched from a hex string
+     */
     function readFromHex(match) {
         // Double up any singular hex values
         function prepareTuple(tuple) {
@@ -518,12 +829,27 @@ window.Color = (function() {
         this.calcHSLFromRGB();
     }
 
+    /**
+     * Reads out a color from the color list and redirects to rgb parser
+     *
+     * @private
+     * @for Color
+     * @method readFromColor
+     * @param {string[]} match RegExp matched from a color
+     */
     function readFromColor(match) {
         var rgbCode = COLOR_MAP[match[1]];
 
         readFromRGB.call(this, rgbCode.match(PARSER.RGB));
     }
 
+    /**
+     * Conversion logic to translate the RGB values to HSL values
+     * Performed whenever red, green, or blue is change, or when hydrated
+     *
+     * @for Color
+     * @method calcHSLFromRGB
+     */
     function convertRGBToHSL() {
         var red = this._red / 255;
         var green = this._green / 255;
@@ -537,6 +863,9 @@ window.Color = (function() {
 
         var saturation = 0;
         var hue = 0;
+
+        // Check for if all rgb are the same
+        // Which would mean saturation is 0
         if (min !== max) {
             if (lightness < 0.5) {
                 saturation = dist / (max + min);
@@ -544,10 +873,12 @@ window.Color = (function() {
                 saturation = dist / (2 - max - min);
             }
 
+            // Calculate the distance between the red and the max
             var distRed = (((max - red) / 6) + (dist / 2)) / dist;
             var distGreen = (((max - green) / 6) + (dist / 2)) / dist;
             var distBlue = (((max - blue) / 6) + (dist / 2)) / dist;
 
+            // Calculate the hue from the max
             if (max === red) {
                 hue = distBlue - distGreen;
             } else if (max === green) {
@@ -564,6 +895,7 @@ window.Color = (function() {
                 hue = hue - 1;
             }
 
+            // Transfer the hue to the 0-360 space
             hue = hue * 360;
         }
 
@@ -572,6 +904,13 @@ window.Color = (function() {
         this._lightness = lightness;
     }
 
+    /**
+     * Conversion logic to translate the HSL values to RGB values
+     * Performed whenever hue, saturation, or lightness is change, or when hydrated
+     *
+     * @for Color
+     * @method calcRGBFromHSL
+     */
     function convertHSLToRGB() {
         var hue = this._hue / 360;
         var saturation = this._saturation;
@@ -581,6 +920,7 @@ window.Color = (function() {
         var green = 0;
         var blue = 0;
 
+        // If there's no saturation, its completely based off of lightness
         if (saturation === 0) {
             red = lightness;
             green = lightness;
@@ -607,6 +947,17 @@ window.Color = (function() {
         this._blue = Math.round(blue * 255);
     }
 
+    /**
+     * Helper Method for transforming hue
+     *
+     * @private
+     * @for Color
+     * @method transformHueIntoColor
+     * @param {number} val1 SL calculation value
+     * @param {number} val2 SL calclation value
+     * @param {number} hueVal Hue based value to calculation against
+     * @return {number} transformed color value
+     */
     function transformHueIntoColor(val1, val2, hueVal) {
         if (hueVal < 0) {
             hueVal = hueVal + 1;
@@ -631,6 +982,28 @@ window.Color = (function() {
         return val1;
     }
 
+    /**
+     * Representative color object
+     * CSS3 Color object to pull in a color string, and provides an API
+     * to transform that value into its RGB and HSL forms
+     *
+     * Supports:
+     *  rgb
+     *  rgba
+     *  hsl
+     *  hsla
+     *  #RGB
+     *  #ARGB
+     *  #RRGGBB
+     *  #AARRGGBB
+     *  colorstring
+     *
+     * Provides an API to be able to transfer readily across different colorspaces
+     *
+     * @class Color
+     * @constructor
+     * @param {string} str CSS3 Color String
+     */
     function Color(str) {
         if (typeof str !== 'string') {
             this.calcHSLFromRGB();
@@ -639,6 +1012,19 @@ window.Color = (function() {
         this.hydrate(str);
     }
 
+    /**
+     * Parses a type from the provided string
+     * Determines the type from the provided TYPES list
+     *
+     * Provides the type based on the string
+     * Performs the parse using regex, via sequential regex
+     *
+     * @for Color
+     * @method parseType
+     * @static
+     * @param {string} str String to parse and determine type
+     * @return {string}
+     */
     function parseType(str) {
         str = str.trim();
         var i = 0;
@@ -659,6 +1045,19 @@ window.Color = (function() {
         return type;
     }
 
+    /**
+     * Convenience method to transform a color back into a color string
+     * Will default to hex if no type is given
+     *
+     * Doesn't sustain the whitespace or formatting of the string
+     *
+     * Uses the list of types to map to the STRING_MAP methods
+     *
+     * @for Color
+     * @method toString
+     * @param {string} type toString
+     * @return {string}
+     */
     function toString(type) {
         if (typeof type !== 'string') {
             return this.toHexString();
@@ -672,6 +1071,15 @@ window.Color = (function() {
         return mappedStringMethod.call(this);
     }
 
+    /**
+     * Conversion function to translate a color value in 255
+     * to a string value, will always pad that number to 2 digits
+     *
+     * @for Color
+     * @method toHexTuple
+     * @param {number} value Value to translate into hexadecimal
+     * @return {string}
+     */
     function toHexTuple(value) {
         var str = value.toString(16);
         while (str.length < 2) {
@@ -681,6 +1089,18 @@ window.Color = (function() {
         return str;
     }
 
+    /**
+     * Converts the color object into a hex string
+     * Will use an 8 digit string if told not to premultiply alpha
+     * If told to premultiply alpha, will use a 6 digit string
+     *
+     * Does not premultiply alpha by default
+     *
+     * @for Color
+     * @method toHexString
+     * @param {boolean} shouldPremultiplyAlpha Flag to determine if it should premultiply alpha
+     * @return {string}
+     */
     function toHexString(shouldPremultiplyAlpha) {
         var red = this._red;
         var green = this._green;
@@ -702,6 +1122,16 @@ window.Color = (function() {
         return '#' + str.toUpperCase();
     }
 
+    /**
+     * Converts the color object into a rgb string
+     * Defaults to rounding instead of allowing a floating point
+     * Premultiplies the rgb when alpha is provided
+     *
+     * @for Color
+     * @method toRGBString
+     * @param {boolean} shouldAllowFloatingPoint Flag to determine whether to allow the floating point
+     * @return {string}
+     */
     function toRGBString(shouldAllowFloatingPoint) {
         var alpha = this._alpha;
         var red = this._red * alpha;
@@ -717,6 +1147,15 @@ window.Color = (function() {
         return 'rgb(' + red + ', ' + green + ', ' + blue + ')';
     }
 
+    /**
+     * Converts the color object into a rgba string
+     * Defaults to rounding instead of allowing a floating point
+     *
+     * @for Color
+     * @method toRGBAString
+     * @param {boolean} shouldAllowFloatingPoint Flag to determine whether to allow the floating point
+     * @return {string}
+     */
     function toRGBAString(shouldAllowFloatingPoint) {
         var alpha = this._alpha;
         var red = this._red;
@@ -732,6 +1171,16 @@ window.Color = (function() {
         return 'rgba(' + red + ', ' + green + ', ' + blue + ', ' + alpha + ')';
     }
 
+    /**
+     * Converts the color object into a hsl string
+     * Defaults to rounding instead of allowing a floating point
+     * Does not premultiply the alpha
+     *
+     * @for Color
+     * @method toHSLString
+     * @param {boolean} shouldAllowFloatingPoint Flag to determine whether to allow the floating point
+     * @return {string}
+     */
     function toHSLString(shouldAllowFloatingPoint) {
         var hue = this._hue;
         var saturation = this._saturation * 100;
@@ -746,6 +1195,16 @@ window.Color = (function() {
         return 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
     }
 
+    /**
+     * Converts the color object into a hsla string
+     * Defaults to rounding instead of allowing a floating point
+     * Does not premultiply the alpha
+     *
+     * @for Color
+     * @method toHSLAString
+     * @param {boolean} shouldAllowFloatingPoint Flag to determine whether to allow the floating point
+     * @return {string}
+     */
     function toHSLAString(shouldAllowFloatingPoint) {
         var alpha = this._alpha;
         var hue = this._hue;
@@ -773,6 +1232,13 @@ window.Color = (function() {
         _saturation: 0,
         _lightness: 0,
 
+        /**
+         * Alpha property that is constrained to 0-1 range
+         *
+         * @for Color
+         * @property alpha
+         * @type {number}
+         */
         get alpha() {
             return this._alpha;
         },
@@ -787,6 +1253,14 @@ window.Color = (function() {
             this._alpha = value;
         },
 
+        /**
+         * Red property that is constrained to 0-255 range
+         * Recalculates HSL after change
+         *
+         * @for Color
+         * @property red
+         * @type {number}
+         */
         get red() {
             return this._red;
         },
@@ -802,6 +1276,14 @@ window.Color = (function() {
             this.calcHSLFromRGB();
         },
 
+        /**
+         * Green property that is constrained to 0-255 range
+         * Recalculates HSL after change
+         *
+         * @for Color
+         * @property green
+         * @type {number}
+         */
         get green() {
             return this._green;
         },
@@ -817,6 +1299,14 @@ window.Color = (function() {
             this.calcHSLFromRGB();
         },
 
+        /**
+         * Blue property that is constrained to 0-255 range
+         * Recalculates HSL after change
+         *
+         * @for Color
+         * @property blue
+         * @type {number}
+         */
         get blue() {
             return this._blue;
         },
@@ -832,6 +1322,15 @@ window.Color = (function() {
             this.calcHSLFromRGB();
         },
 
+        /**
+         * Hue property that is constrained to 0-360 range
+         * Loops around after the 360
+         * Recalculates RGB after change
+         *
+         * @for Color
+         * @property hue
+         * @type {number}
+         */
         get hue() {
             return this._hue;
         },
@@ -851,6 +1350,14 @@ window.Color = (function() {
             this.calcRGBFromHSL();
         },
 
+        /**
+         * Saturation property that is constrained to 0-1 range
+         * Recalculates RGB after change
+         *
+         * @for Color
+         * @property saturation
+         * @type {number}
+         */
         get saturation() {
             return this._saturation;
         },
@@ -866,6 +1373,14 @@ window.Color = (function() {
             this.calcRGBFromHSL();
         },
 
+        /**
+         * Lightness property that is constrained to 0-1 range
+         * Recalculates RGB after change
+         *
+         * @for Color
+         * @property lightness
+         * @type {number}
+         */
         get lightness() {
             return this._lightness;
         },
@@ -885,6 +1400,7 @@ window.Color = (function() {
 
         calcHSLFromRGB: convertRGBToHSL,
         calcRGBFromHSL: convertHSLToRGB,
+
         toHexString: toHexString,
         toRGBString: toRGBString,
         toRGBAString: toRGBAString,
@@ -897,4 +1413,4 @@ window.Color = (function() {
     Color.TYPES = TYPES;
 
     return Color;
-}());
+}));
