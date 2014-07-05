@@ -636,7 +636,7 @@ window.Color = (function() {
             this.calcHSLFromRGB();
             return;
         }
-        hydrate.call(this, str);
+        this.hydrate(str);
     }
 
     function parseType(str) {
@@ -880,6 +880,8 @@ window.Color = (function() {
             this._lightness = value;
             this.calcRGBFromHSL();
         },
+
+        hydrate: hydrate,
 
         calcHSLFromRGB: convertRGBToHSL,
         calcRGBFromHSL: convertHSLToRGB,

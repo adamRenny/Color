@@ -5,410 +5,433 @@ describe('Color', function() {
         Color = window.Color;
     });
 
-    describe('#constructor', function() {
-        var color;
-        describe('-hydrateUnknown', function() {
-            it('should provide a black color when given a non-string value', function() {
-                color = new Color();
-                expect(color.red).toBe(0);
-                expect(color.green).toBe(0);
-                expect(color.blue).toBe(0);
-                expect(color.alpha).toBe(1);
-
-                color = new Color(1234);
-                expect(color.red).toBe(0);
-                expect(color.green).toBe(0);
-                expect(color.blue).toBe(0);
-                expect(color.alpha).toBe(1);
-
-                color = new Color({});
-                expect(color.red).toBe(0);
-                expect(color.green).toBe(0);
-                expect(color.blue).toBe(0);
-                expect(color.alpha).toBe(1);
-
-                color = new Color(true);
-                expect(color.red).toBe(0);
-                expect(color.green).toBe(0);
-                expect(color.blue).toBe(0);
-                expect(color.alpha).toBe(1);
-
-                color = new Color(false);
-                expect(color.red).toBe(0);
-                expect(color.green).toBe(0);
-                expect(color.blue).toBe(0);
-                expect(color.alpha).toBe(1);
-
-                color = new Color(function() {});
-                expect(color.red).toBe(0);
-                expect(color.green).toBe(0);
-                expect(color.blue).toBe(0);
-                expect(color.alpha).toBe(1);
+    function generateHydrationTests(setup, shouldInitializeColor) {
+        return function() {
+            var color;
+            beforeEach(function() {
+                if (shouldInitializeColor) {
+                    color = new Color();
+                }
             });
 
-            it('should provide a black color when given an invalid string', function() {
-                color = new Color('');
-                expect(color.red).toBe(0);
-                expect(color.green).toBe(0);
-                expect(color.blue).toBe(0);
-                expect(color.alpha).toBe(1);
+            describe('-hydrateUnknown', function() {
+                if (!shouldInitializeColor) {
+                    it('should provide a black color when given a non-string value', function() {
+                        color = setup.call(color);
+                        expect(color.red).toBe(0);
+                        expect(color.green).toBe(0);
+                        expect(color.blue).toBe(0);
+                        expect(color.alpha).toBe(1);
 
-                color = new Color('hsl(almost,there,but,not)');
-                expect(color.red).toBe(0);
-                expect(color.green).toBe(0);
-                expect(color.blue).toBe(0);
-                expect(color.alpha).toBe(1);
+                        color = setup.call(color, 1234);
+                        expect(color.red).toBe(0);
+                        expect(color.green).toBe(0);
+                        expect(color.blue).toBe(0);
+                        expect(color.alpha).toBe(1);
 
-                color = new Color('rgba(1,2,3)');
-                expect(color.red).toBe(0);
-                expect(color.green).toBe(0);
-                expect(color.blue).toBe(0);
-                expect(color.alpha).toBe(1);
+                        color = setup.call(color, {});
+                        expect(color.red).toBe(0);
+                        expect(color.green).toBe(0);
+                        expect(color.blue).toBe(0);
+                        expect(color.alpha).toBe(1);
 
-                color = new Color('rbg(#ff0022)');
-                expect(color.red).toBe(0);
-                expect(color.green).toBe(0);
-                expect(color.blue).toBe(0);
-                expect(color.alpha).toBe(1);
+                        color = setup.call(color, true);
+                        expect(color.red).toBe(0);
+                        expect(color.green).toBe(0);
+                        expect(color.blue).toBe(0);
+                        expect(color.alpha).toBe(1);
 
-                color = new Color('#a');
-                expect(color.red).toBe(0);
-                expect(color.green).toBe(0);
-                expect(color.blue).toBe(0);
-                expect(color.alpha).toBe(1);
+                        color = setup.call(color, false);
+                        expect(color.red).toBe(0);
+                        expect(color.green).toBe(0);
+                        expect(color.blue).toBe(0);
+                        expect(color.alpha).toBe(1);
 
-                color = new Color('#NOPE');
-                expect(color.red).toBe(0);
-                expect(color.green).toBe(0);
-                expect(color.blue).toBe(0);
-                expect(color.alpha).toBe(1);
+                        color = setup.call(color, function() {});
+                        expect(color.red).toBe(0);
+                        expect(color.green).toBe(0);
+                        expect(color.blue).toBe(0);
+                        expect(color.alpha).toBe(1);
+                    });
+                }
 
-                color = new Color('-134');
-                expect(color.red).toBe(0);
-                expect(color.green).toBe(0);
-                expect(color.blue).toBe(0);
-                expect(color.alpha).toBe(1);
-            });
-        })
+                it('should provide a black color when given an invalid string', function() {
+                    color = setup.call(color, '');
+                    expect(color.red).toBe(0);
+                    expect(color.green).toBe(0);
+                    expect(color.blue).toBe(0);
+                    expect(color.alpha).toBe(1);
 
-        describe('-hydrateHex', function() {
-            it('should hydrate a color from a 3 digit hex string', function() {
-                color = new Color('#012');
+                    color = setup.call(color, 'hsl(almost,there,but,not)');
+                    expect(color.red).toBe(0);
+                    expect(color.green).toBe(0);
+                    expect(color.blue).toBe(0);
+                    expect(color.alpha).toBe(1);
 
-                expect(color.red).toBe(0);
-                expect(color.alpha).toBe(1);
-                expect(
-                    color.green
-                ).toBe(
-                    parseInt('11', 16)
-                );
-                expect(
-                    color.blue
-                ).toBe(
-                    parseInt('22', 16)
-                );
-            });
+                    color = setup.call(color, 'rgba(1,2,3)');
+                    expect(color.red).toBe(0);
+                    expect(color.green).toBe(0);
+                    expect(color.blue).toBe(0);
+                    expect(color.alpha).toBe(1);
 
-            it('should hydrate a color from a 4 digit hex string', function() {
-                color = new Color('#C012');
+                    color = setup.call(color, 'rbg(#ff0022)');
+                    expect(color.red).toBe(0);
+                    expect(color.green).toBe(0);
+                    expect(color.blue).toBe(0);
+                    expect(color.alpha).toBe(1);
 
-                expect(
-                    color.alpha
-                ).toBe(
-                    parseInt('CC', 16) / 255
-                );
-                expect(color.red).toBe(0);
-                expect(
-                    color.green
-                ).toBe(
-                    parseInt('11', 16)
-                );
-                expect(
-                    color.blue
-                ).toBe(
-                    parseInt('22', 16)
-                );
-            });
+                    color = setup.call(color, '#a');
+                    expect(color.red).toBe(0);
+                    expect(color.green).toBe(0);
+                    expect(color.blue).toBe(0);
+                    expect(color.alpha).toBe(1);
 
-            it('should hydrate a color from a 6 digit hex string', function() {
-                color = new Color('#123412');
-                
-                expect(color.alpha).toBe(1);
+                    color = setup.call(color, '#NOPE');
+                    expect(color.red).toBe(0);
+                    expect(color.green).toBe(0);
+                    expect(color.blue).toBe(0);
+                    expect(color.alpha).toBe(1);
 
-                expect(
-                    color.red
-                ).toBe(
-                    parseInt('12', 16)
-                );
+                    color = setup.call(color, '-134');
+                    expect(color.red).toBe(0);
+                    expect(color.green).toBe(0);
+                    expect(color.blue).toBe(0);
+                    expect(color.alpha).toBe(1);
+                });
+            })
 
-                expect(
-                    color.green
-                ).toBe(
-                    parseInt('34', 16)
-                );
+            describe('-hydrateHex', function() {
+                it('should hydrate a color from a 3 digit hex string', function() {
+                    color = setup.call(color, '#012');
 
-                expect(
-                    color.blue
-                ).toBe(
-                    parseInt('12', 16)
-                );
-            });
+                    expect(color.red).toBe(0);
+                    expect(color.alpha).toBe(1);
+                    expect(
+                        color.green
+                    ).toBe(
+                        parseInt('11', 16)
+                    );
+                    expect(
+                        color.blue
+                    ).toBe(
+                        parseInt('22', 16)
+                    );
+                });
 
-            it('should hydrate a color from a 6 digit hex string', function() {
-                color = new Color('#11aaBB');
+                it('should hydrate a color from a 4 digit hex string', function() {
+                    color = setup.call(color, '#C012');
 
-                expect(color.alpha).toBe(1);
+                    expect(
+                        color.alpha
+                    ).toBe(
+                        parseInt('CC', 16) / 255
+                    );
+                    expect(color.red).toBe(0);
+                    expect(
+                        color.green
+                    ).toBe(
+                        parseInt('11', 16)
+                    );
+                    expect(
+                        color.blue
+                    ).toBe(
+                        parseInt('22', 16)
+                    );
+                });
 
-                expect(
-                    color.red
-                ).toBe(
-                    parseInt('11', 16)
-                );
+                it('should hydrate a color from a 6 digit hex string', function() {
+                    color = setup.call(color, '#123412');
+                    
+                    expect(color.alpha).toBe(1);
 
-                expect(
-                    color.green
-                ).toBe(
-                    parseInt('aa', 16)
-                );
+                    expect(
+                        color.red
+                    ).toBe(
+                        parseInt('12', 16)
+                    );
 
-                expect(
-                    color.blue
-                ).toBe(
-                    parseInt('BB', 16)
-                );
-            });
+                    expect(
+                        color.green
+                    ).toBe(
+                        parseInt('34', 16)
+                    );
 
-            it('should hydrate a color from an 8 digit hex string', function() {
-                color = new Color('#AABBCCDD');
-                
-                 expect(
-                    color.alpha
-                ).toBe(
-                    parseInt('AA', 16) / 255
-                );
+                    expect(
+                        color.blue
+                    ).toBe(
+                        parseInt('12', 16)
+                    );
+                });
 
-                expect(
-                    color.red
-                ).toBe(
-                    parseInt('BB', 16)
-                );
+                it('should hydrate a color from a 6 digit hex string', function() {
+                    color = setup.call(color, '#11aaBB');
 
-                expect(
-                    color.green
-                ).toBe(
-                    parseInt('CC', 16)
-                );
+                    expect(color.alpha).toBe(1);
 
-                expect(
-                    color.blue
-                ).toBe(
-                    parseInt('DD', 16)
-                );
-            });
+                    expect(
+                        color.red
+                    ).toBe(
+                        parseInt('11', 16)
+                    );
 
-            it('should calculate the HSL value', function() {
-                var calcMethod = Color.prototype.calcHSLFromRGB;
-                spyOn(Color.prototype, 'calcHSLFromRGB');
+                    expect(
+                        color.green
+                    ).toBe(
+                        parseInt('aa', 16)
+                    );
 
-                color = new Color('#AABBCCDD');
-                expect(color.calcHSLFromRGB).toHaveBeenCalled();
+                    expect(
+                        color.blue
+                    ).toBe(
+                        parseInt('BB', 16)
+                    );
+                });
 
-                Color.prototype.calcHSLFromRGB = calcMethod;
-            });
-        });
+                it('should hydrate a color from an 8 digit hex string', function() {
+                    color = setup.call(color, '#AABBCCDD');
+                    
+                     expect(
+                        color.alpha
+                    ).toBe(
+                        parseInt('AA', 16) / 255
+                    );
 
-        describe('-hydrateRGB', function() {
-            it('should pull the rgb from the color code string', function() {
-                color = new Color('rgb(100, 100, 20)');
+                    expect(
+                        color.red
+                    ).toBe(
+                        parseInt('BB', 16)
+                    );
 
-                expect(
-                    color.red
-                ).toBe(
-                    100
-                );
+                    expect(
+                        color.green
+                    ).toBe(
+                        parseInt('CC', 16)
+                    );
 
-                expect(
-                    color.green
-                ).toBe(
-                    100
-                );
+                    expect(
+                        color.blue
+                    ).toBe(
+                        parseInt('DD', 16)
+                    );
+                });
 
-                expect(
-                    color.blue
-                ).toBe(
-                    20
-                );
+                it('should calculate the HSL value', function() {
+                    var calcMethod = Color.prototype.calcHSLFromRGB;
+                    spyOn(Color.prototype, 'calcHSLFromRGB');
 
-                expect(
-                    color.alpha
-                ).toBe(
-                    1
-                );
-            });
+                    color = setup.call(color, '#AABBCCDD');
+                    expect(color.calcHSLFromRGB).toHaveBeenCalled();
 
-            it('should pull the rgba from the color code string', function() {
-                color = new Color('rgba(56, 38.2, 12, 0.354)');
-
-                expect(
-                    color.red
-                ).toBe(
-                    56
-                );
-
-                expect(
-                    color.green
-                ).toBe(
-                    38.2
-                );
-
-                expect(
-                    color.blue
-                ).toBe(
-                    12
-                );
-
-                expect(
-                    color.alpha
-                ).toBe(
-                    0.354
-                );
+                    Color.prototype.calcHSLFromRGB = calcMethod;
+                });
             });
 
-            it('should calculate the HSL value', function() {
-                var calcMethod = Color.prototype.calcHSLFromRGB;
-                spyOn(Color.prototype, 'calcHSLFromRGB');
+            describe('-hydrateRGB', function() {
+                it('should pull the rgb from the color code string', function() {
+                    color = setup.call(color, 'rgb(100, 100, 20)');
 
-                color = new Color('rgba(56, 38.2, 12, 0.354)');
-                expect(color.calcHSLFromRGB).toHaveBeenCalled();
+                    expect(
+                        color.red
+                    ).toBe(
+                        100
+                    );
 
-                Color.prototype.calcHSLFromRGB = calcMethod;
+                    expect(
+                        color.green
+                    ).toBe(
+                        100
+                    );
+
+                    expect(
+                        color.blue
+                    ).toBe(
+                        20
+                    );
+
+                    expect(
+                        color.alpha
+                    ).toBe(
+                        1
+                    );
+                });
+
+                it('should pull the rgba from the color code string', function() {
+                    color = setup.call(color, 'rgba(56, 38.2, 12, 0.354)');
+
+                    expect(
+                        color.red
+                    ).toBe(
+                        56
+                    );
+
+                    expect(
+                        color.green
+                    ).toBe(
+                        38.2
+                    );
+
+                    expect(
+                        color.blue
+                    ).toBe(
+                        12
+                    );
+
+                    expect(
+                        color.alpha
+                    ).toBe(
+                        0.354
+                    );
+                });
+
+                it('should calculate the HSL value', function() {
+                    var calcMethod = Color.prototype.calcHSLFromRGB;
+                    spyOn(Color.prototype, 'calcHSLFromRGB');
+
+                    color = setup.call(color, 'rgba(56, 38.2, 12, 0.354)');
+                    expect(color.calcHSLFromRGB).toHaveBeenCalled();
+
+                    Color.prototype.calcHSLFromRGB = calcMethod;
+                });
             });
-        });
 
-        describe('-hydrateHSL', function() {
-            it('should pull the hsl from the color code string', function() {
-                color = new Color('hsl(323, 100%, 50%)');
+            describe('-hydrateHSL', function() {
+                it('should pull the hsl from the color code string', function() {
+                    color = setup.call(color, 'hsl(323, 100%, 50%)');
 
-                expect(
-                    color.hue
-                ).toBe(
-                    323
-                );
+                    expect(
+                        color.hue
+                    ).toBe(
+                        323
+                    );
 
-                expect(
-                    color.saturation
-                ).toBe(
-                    1
-                );
+                    expect(
+                        color.saturation
+                    ).toBe(
+                        1
+                    );
 
-                expect(
-                    color.lightness
-                ).toBe(
-                    0.5
-                );
+                    expect(
+                        color.lightness
+                    ).toBe(
+                        0.5
+                    );
 
-                expect(
-                    color.alpha
-                ).toBe(
-                    1
-                );
+                    expect(
+                        color.alpha
+                    ).toBe(
+                        1
+                    );
+                });
+
+                it('should pull the hsla from the color code string', function() {
+                    color = setup.call(color, 'hsla(45, 0.234%, 12%, 0.65)');
+
+                    expect(
+                        color.hue
+                    ).toBe(
+                        45
+                    );
+
+                    expect(
+                        color.saturation
+                    ).toBe(
+                        0.00234
+                    );
+
+                    expect(
+                        color.lightness
+                    ).toBe(
+                        0.12
+                    );
+
+                    expect(
+                        color.alpha
+                    ).toBe(
+                        0.65
+                    );
+                });
+
+                it('should calculate the RGB value', function() {
+                    var calcMethod = Color.prototype.calcRGBFromHSL;
+                    spyOn(Color.prototype, 'calcRGBFromHSL');
+
+                    color = setup.call(color, 'hsla(45, 0.234%, 12%, 0.65)');
+                    expect(color.calcRGBFromHSL).toHaveBeenCalled();
+
+                    Color.prototype.calcRGBFromHSL = calcMethod;
+                });
             });
 
-            it('should pull the hsla from the color code string', function() {
-                color = new Color('hsla(45, 0.234%, 12%, 0.65)');
+            describe('-hydrateColors', function() {
+                it('should pull the RGB from the color lookup', function() {
+                    color = setup.call(color, 'chocolate');
 
-                expect(
-                    color.hue
-                ).toBe(
-                    45
-                );
+                    expect(
+                        color.red
+                    ).toBe(
+                        210
+                    );
 
-                expect(
-                    color.saturation
-                ).toBe(
-                    0.00234
-                );
+                    expect(
+                        color.green
+                    ).toBe(
+                        105
+                    );
 
-                expect(
-                    color.lightness
-                ).toBe(
-                    0.12
-                );
+                    expect(
+                        color.blue
+                    ).toBe(
+                        30
+                    );
 
-                expect(
-                    color.alpha
-                ).toBe(
-                    0.65
-                );
+                    expect(
+                        color.alpha
+                    ).toBe(
+                        1
+                    );
+
+                    color = setup.call(color, 'floralwhite');
+
+                    expect(
+                        color.red
+                    ).toBe(
+                        255
+                    );
+
+                    expect(
+                        color.green
+                    ).toBe(
+                        250
+                    );
+
+                    expect(
+                        color.blue
+                    ).toBe(
+                        240
+                    );
+
+                    expect(
+                        color.alpha
+                    ).toBe(
+                        1
+                    );
+                });
             });
+        };
+    }
 
-            it('should calculate the RGB value', function() {
-                var calcMethod = Color.prototype.calcRGBFromHSL;
-                spyOn(Color.prototype, 'calcRGBFromHSL');
+    describe('#constructor', generateHydrationTests(
+        function setup(param) {
+            return new Color(param);
+        }, false
+    ));
 
-                color = new Color('hsla(45, 0.234%, 12%, 0.65)');
-                expect(color.calcRGBFromHSL).toHaveBeenCalled();
-
-                Color.prototype.calcRGBFromHSL = calcMethod;
-            });
-        });
-
-        describe('-hydrateColors', function() {
-            it('should pull the RGB from the color lookup', function() {
-                color = new Color('chocolate');
-
-                expect(
-                    color.red
-                ).toBe(
-                    210
-                );
-
-                expect(
-                    color.green
-                ).toBe(
-                    105
-                );
-
-                expect(
-                    color.blue
-                ).toBe(
-                    30
-                );
-
-                expect(
-                    color.alpha
-                ).toBe(
-                    1
-                );
-
-                color = new Color('floralwhite');
-
-                expect(
-                    color.red
-                ).toBe(
-                    255
-                );
-
-                expect(
-                    color.green
-                ).toBe(
-                    250
-                );
-
-                expect(
-                    color.blue
-                ).toBe(
-                    240
-                );
-
-                expect(
-                    color.alpha
-                ).toBe(
-                    1
-                );
-            });
-        });
-    });
+    describe('#hydrate', generateHydrationTests(
+        function setup(param) {
+            this.hydrate(param);
+            return this;
+        }, true
+    ));
 
     describe('#calcHSLFromRGB', function() {
         // HSL calculation has a heavy precision loss in JS
