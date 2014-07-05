@@ -1,0 +1,16 @@
+{
+  "name": "color",
+  "main": "dist/Color.js",
+  "description": "A Color object to manage those pesky CSS color strings",
+  "licence": "MIT",
+  "ignore": [
+    "node_modules",
+    "karma.conf.js",
+    "gulpfile.js",
+    "package.json",
+    "LICENSE",
+    "reports"
+    ".gitignore",
+    ".jshintrc"
+  ]
+}
