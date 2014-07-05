@@ -1,6 +1,6 @@
 {
   "name": "color-obj",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Color object to manage those pesky CSS color strings",
   "main": "src/Color.js",
   "repository": {
