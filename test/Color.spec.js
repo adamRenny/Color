@@ -1362,4 +1362,376 @@ describe('Color', function() {
             });
         }(PERCENTS[i]));
     }
+
+    describe('#toHexString', function() {
+        var str;
+        beforeEach(function() {
+            color = new Color();
+        });
+
+        it('should transform with an alpha value', function() {
+            color.red = 255;
+            color.green = 24;
+            color.blue = 23;
+
+            str = color.toHexString();
+            expect(str.toLowerCase()).toBe('#ffff1817');
+        });
+
+        it('should transform without an alpha value when provided a truthy parameter', function() {
+            color.red = 100;
+            color.green = 45;
+            color.blue = 200;
+
+            str = color.toHexString(true);
+            expect(str.toLowerCase()).toBe('#642dc8');
+
+            str = color.toHexString(23);
+            expect(str.toLowerCase()).toBe('#642dc8');
+
+            str = color.toHexString({});
+            expect(str.toLowerCase()).toBe('#642dc8');
+
+            str = color.toHexString(function() {});
+            expect(str.toLowerCase()).toBe('#642dc8');
+        });
+
+        it('should premultiply alpha when alpha is not 1', function() {
+            color.red = 255;
+            color.green = 255;
+            color.blue = 255;
+            color.alpha = 0.5;
+
+            str = color.toHexString(true);
+            expect(str.toLowerCase()).toBe('#808080');
+        });
+
+        it('should transform the string without floating point decimals', function() {
+            color.red = 240.234;
+            color.green = 23.123654;
+            color.blue = 83.79746;
+            color.alpha = 0.745;
+
+            str = color.toHexString(true);
+            expect(str.toLowerCase()).toBe('#b3113e');
+
+            str = color.toHexString();
+            expect(str.toLowerCase()).toBe('#bef01754');
+        });
+
+        it('should pipe through #toString', function() {
+            color.red = 255;
+            color.green = 24;
+            color.blue = 23;
+
+            str = color.toString(Color.TYPES.HEX);
+            expect(str.toLowerCase()).toBe('#ffff1817');
+
+            str = color.toString(Color.TYPES.HEX2);
+            expect(str.toLowerCase()).toBe('#ffff1817');
+        });
+    });
+
+    describe('#toRGBString', function() {
+        var str;
+        beforeEach(function() {
+            color = new Color();
+        });
+
+        it('should transform into a rgb string', function() {
+            color.red = 100;
+            color.green = 125;
+            color.blue = 150;
+
+            str = color.toRGBString();
+            expect(str).toBe('rgb(100, 125, 150)');
+        });
+
+        it('should premultiply the alpha', function() {
+            color.red = 255;
+            color.green = 2;
+            color.blue = 24;
+            color.alpha = 0.1;
+
+            str = color.toRGBString();
+            expect(str).toBe('rgb(26, 0, 2)');
+        });
+
+        it('should allow floating point values when requested to', function() {
+            color.red = 200.245;
+            color.green = 2.234;
+            color.blue = 24.623;
+
+            str = color.toRGBString(true);
+            expect(str).toBe('rgb(200.245, 2.234, 24.623)');
+        });
+
+        it('should disallow floating point values when by default', function() {
+            color.red = 200.245;
+            color.green = 2.234;
+            color.blue = 24.623;
+
+            str = color.toRGBString();
+            expect(str).toBe('rgb(200, 2, 25)');
+        });
+
+        it('should pipe through #toString', function() {
+            color.red = 100;
+            color.green = 125;
+            color.blue = 150;
+
+            str = color.toString(Color.TYPES.RGB);
+            expect(str).toBe('rgb(100, 125, 150)');
+
+            color.red = 255;
+            color.green = 2;
+            color.blue = 24;
+            color.alpha = 0.1;
+
+            str = color.toString(Color.TYPES.RGB);
+            expect(str).toBe('rgb(26, 0, 2)');
+        });
+    });
+
+    describe('#toRGBAString', function() {
+        var str;
+        beforeEach(function() {
+            color = new Color();
+        });
+
+        it('should transform into a rgba string', function() {
+            color.red = 100;
+            color.green = 125;
+            color.blue = 150;
+
+            str = color.toRGBAString();
+            expect(str).toBe('rgba(100, 125, 150, 1)');
+
+            color.red = 255;
+            color.green = 2;
+            color.blue = 24;
+            color.alpha = 0.1;
+
+            str = color.toRGBAString();
+            expect(str).toBe('rgba(255, 2, 24, 0.1)');
+        });
+
+        it('should allow floating point values when requested to', function() {
+            color.red = 200.245;
+            color.green = 2.234;
+            color.blue = 24.623;
+
+            str = color.toRGBAString(true);
+            expect(str).toBe('rgba(200.245, 2.234, 24.623, 1)');
+        });
+
+        it('should disallow floating point values when by default', function() {
+            color.red = 200.245;
+            color.green = 2.234;
+            color.blue = 24.623;
+
+            str = color.toRGBAString();
+            expect(str).toBe('rgba(200, 2, 25, 1)');
+        });
+
+        it('should always show alpha value despite disallowing floating point', function() {
+            color.red = 200.245;
+            color.green = 2.234;
+            color.blue = 24.623;
+            color.alpha = 0.6;
+
+            str = color.toRGBAString();
+            expect(str).toBe('rgba(200, 2, 25, 0.6)');
+        });
+
+        it('should pipe through #toString', function() {
+            color.red = 100;
+            color.green = 125;
+            color.blue = 150;
+
+            str = color.toString(Color.TYPES.RGBA);
+            expect(str).toBe('rgba(100, 125, 150, 1)');
+
+            color.red = 255;
+            color.green = 2;
+            color.blue = 24;
+            color.alpha = 0.1;
+
+            str = color.toString(Color.TYPES.RGBA);
+            expect(str).toBe('rgba(255, 2, 24, 0.1)');
+        });
+    });
+
+    describe('#toHSLString', function() {
+        var str;
+        beforeEach(function() {
+            color = new Color();
+        });
+
+        it('should transform into an hsl string', function() {
+            color.hue = 254;
+            color.saturation = 0.45;
+            color.lightness = 0.34;
+
+            str = color.toHSLString();
+            expect(str).toBe('hsl(254, 45%, 34%)');
+
+            color.hue = 212;
+            color.saturation = 1;
+            color.lightness = 0.65;
+
+            str = color.toHSLString();
+            expect(str).toBe('hsl(212, 100%, 65%)');
+        });
+
+        it('should show the floating point values when requested to', function() {
+            color.hue = 254.123;
+            color.saturation = 0.4545;
+            color.lightness = 0.3412;
+
+            str = color.toHSLString(true);
+            expect(str).toBe('hsl(254.123, 45.45%, 34.12%)');
+
+            color.hue = 212.0234;
+            color.saturation = 0.987;
+            color.lightness = 0.1123;
+
+            str = color.toHSLString(true);
+            expect(str).toBe('hsl(212.0234, 98.7%, 11.23%)');
+        });
+
+        it('should pipe through #toString', function() {
+            color.hue = 254;
+            color.saturation = 0.45;
+            color.lightness = 0.34;
+
+            str = color.toString(Color.TYPES.HSL);
+            expect(str).toBe('hsl(254, 45%, 34%)');
+
+            color.hue = 212;
+            color.saturation = 1;
+            color.lightness = 0.65;
+
+            str = color.toString(Color.TYPES.HSL);
+            expect(str).toBe('hsl(212, 100%, 65%)');
+        });
+    });
+
+    describe('#toHSLAString', function() {
+        var str;
+        beforeEach(function() {
+            color = new Color();
+        });
+
+        it('should transform into an hsla string', function() {
+            color.hue = 254;
+            color.saturation = 0.45;
+            color.lightness = 0.34;
+            color.alpha = 0.8;
+
+            str = color.toHSLAString();
+            expect(str).toBe('hsla(254, 45%, 34%, 0.8)');
+
+            color.hue = 212;
+            color.saturation = 1;
+            color.lightness = 0.65;
+            color.alpha = 0.21;
+
+            str = color.toHSLAString();
+            expect(str).toBe('hsla(212, 100%, 65%, 0.21)');
+        });
+
+        it('should show the floating point values when requested to', function() {
+            color.hue = 254.123;
+            color.saturation = 0.4545;
+            color.lightness = 0.3412;
+            color.alpha = 0.45;
+
+            str = color.toHSLAString(true);
+            expect(str).toBe('hsla(254.123, 45.45%, 34.12%, 0.45)');
+
+            color.hue = 212.0234;
+            color.saturation = 0.987;
+            color.lightness = 0.1123;
+            color.alpha = 1;
+
+            str = color.toHSLAString(true);
+            expect(str).toBe('hsla(212.0234, 98.7%, 11.23%, 1)');
+        });
+
+        it('should pipe through #toString', function() {
+            color.hue = 254;
+            color.saturation = 0.45;
+            color.lightness = 0.34;
+            color.alpha = 0.8;
+
+            str = color.toHSLAString(Color.TYPES.HSLA);
+            expect(str).toBe('hsla(254, 45%, 34%, 0.8)');
+
+            color.hue = 212;
+            color.saturation = 1;
+            color.lightness = 0.65;
+            color.alpha = 0.21;
+
+            str = color.toHSLAString(Color.TYPES.HSLA);
+            expect(str).toBe('hsla(212, 100%, 65%, 0.21)');
+        });
+    });
+
+    describe('#toString', function() {
+        beforeEach(function() {
+            color = new Color();
+            spyOn(color, 'toHexString');
+            spyOn(color, 'toHSLString');
+            spyOn(color, 'toHSLAString');
+            spyOn(color, 'toRGBString');
+            spyOn(color, 'toRGBAString');
+        });
+
+        it('should call toHexString with no parameters', function() {
+            color.toString();
+            expect(color.toHexString).toHaveBeenCalled();
+            expect(color.toHSLString).not.toHaveBeenCalled();
+            expect(color.toHSLAString).not.toHaveBeenCalled();
+            expect(color.toRGBString).not.toHaveBeenCalled();
+            expect(color.toRGBAString).not.toHaveBeenCalled();
+        });
+
+        it('should call toHexString with invalid parameters', function() {
+            color.toString(23);
+            expect(color.toHexString.calls.length).toBe(1);
+            expect(color.toHSLString.calls.length).toBe(0);
+            expect(color.toHSLAString.calls.length).toBe(0);
+            expect(color.toRGBString.calls.length).toBe(0);
+            expect(color.toRGBAString.calls.length).toBe(0);
+
+            color.toString({});
+            expect(color.toHexString.calls.length).toBe(2);
+            expect(color.toHSLString.calls.length).toBe(0);
+            expect(color.toHSLAString.calls.length).toBe(0);
+            expect(color.toRGBString.calls.length).toBe(0);
+            expect(color.toRGBAString.calls.length).toBe(0);
+
+            color.toString(function() {});
+            expect(color.toHexString.calls.length).toBe(3);
+            expect(color.toHSLString.calls.length).toBe(0);
+            expect(color.toHSLAString.calls.length).toBe(0);
+            expect(color.toRGBString.calls.length).toBe(0);
+            expect(color.toRGBAString.calls.length).toBe(0);
+
+            color.toString(true);
+            expect(color.toHexString.calls.length).toBe(4);
+            expect(color.toHSLString.calls.length).toBe(0);
+            expect(color.toHSLAString.calls.length).toBe(0);
+            expect(color.toRGBString.calls.length).toBe(0);
+            expect(color.toRGBAString.calls.length).toBe(0);
+
+            color.toString(false);
+            expect(color.toHexString.calls.length).toBe(5);
+            expect(color.toHSLString.calls.length).toBe(0);
+            expect(color.toHSLAString.calls.length).toBe(0);
+            expect(color.toRGBString.calls.length).toBe(0);
+            expect(color.toRGBAString.calls.length).toBe(0);
+        });
+    });
 });

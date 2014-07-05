@@ -46,6 +46,14 @@ window.Color = (function() {
     PARSER_MAP[TYPES.HEX2] = PARSER.HEX2;
     PARSER_MAP[TYPES.LUT] = PARSER.LUT;
 
+    var STRING_MAP = {};
+    STRING_MAP[TYPES.HSL] = toHSLString;
+    STRING_MAP[TYPES.HSLA] = toHSLAString;
+    STRING_MAP[TYPES.RGB] = toRGBString;
+    STRING_MAP[TYPES.RGBA] = toRGBAString;
+    STRING_MAP[TYPES.HEX] = toHexString;
+    STRING_MAP[TYPES.HEX2] = toHexString;
+
     // Use a parser list to control order of operations
     var PARSER_LIST = [
         {
@@ -651,6 +659,108 @@ window.Color = (function() {
         return type;
     }
 
+    function toString(type) {
+        if (typeof type !== 'string') {
+            return this.toHexString();
+        }
+
+        var mappedStringMethod = STRING_MAP[type];
+        if (typeof mappedStringMethod === 'undefined') {
+            mappedStringMethod = toHexString;
+        }
+
+        return mappedStringMethod.call(this);
+    }
+
+    function toHexTuple(value) {
+        var str = value.toString(16);
+        while (str.length < 2) {
+            str = '0' + str;
+        }
+
+        return str;
+    }
+
+    function toHexString(shouldPremultiplyAlpha) {
+        var red = this._red;
+        var green = this._green;
+        var blue = this._blue;
+        var alpha = this._alpha;
+
+        var str;
+
+        if (shouldPremultiplyAlpha) {
+            red = Math.round(red * alpha);
+            green = Math.round(green * alpha);
+            blue = Math.round(blue * alpha);
+
+            str = toHexTuple(red) + toHexTuple(green) + toHexTuple(blue);
+        } else {
+            str = toHexTuple(Math.round(alpha * 255)) + toHexTuple(Math.round(red)) + toHexTuple(Math.round(green)) + toHexTuple(Math.round(blue));
+        }
+
+        return '#' + str.toUpperCase();
+    }
+
+    function toRGBString(shouldAllowFloatingPoint) {
+        var alpha = this._alpha;
+        var red = this._red * alpha;
+        var green = this._green * alpha;
+        var blue = this._blue * alpha;
+
+        if (!shouldAllowFloatingPoint) {
+            red = Math.round(red);
+            green = Math.round(green);
+            blue = Math.round(blue);
+        }
+
+        return 'rgb(' + red + ', ' + green + ', ' + blue + ')';
+    }
+
+    function toRGBAString(shouldAllowFloatingPoint) {
+        var alpha = this._alpha;
+        var red = this._red;
+        var green = this._green;
+        var blue = this._blue;
+
+        if (!shouldAllowFloatingPoint) {
+            red = Math.round(red);
+            green = Math.round(green);
+            blue = Math.round(blue);
+        }
+
+        return 'rgba(' + red + ', ' + green + ', ' + blue + ', ' + alpha + ')';
+    }
+
+    function toHSLString(shouldAllowFloatingPoint) {
+        var hue = this._hue;
+        var saturation = this._saturation * 100;
+        var lightness = this._lightness * 100;
+
+        if (!shouldAllowFloatingPoint) {
+            hue = Math.round(hue);
+            saturation = Math.round(saturation);
+            lightness = Math.round(lightness);
+        }
+
+        return 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
+    }
+
+    function toHSLAString(shouldAllowFloatingPoint) {
+        var alpha = this._alpha;
+        var hue = this._hue;
+        var saturation = this._saturation * 100;
+        var lightness = this._lightness * 100;
+
+        if (!shouldAllowFloatingPoint) {
+            hue = Math.round(hue);
+            saturation = Math.round(saturation);
+            lightness = Math.round(lightness);
+        }
+
+        return 'hsla(' + hue + ', ' + saturation + '%, ' + lightness + '%, ' + alpha + ')';
+    }
+
     Color.prototype = {
         constructor: Color,
 
@@ -772,7 +882,13 @@ window.Color = (function() {
         },
 
         calcHSLFromRGB: convertRGBToHSL,
-        calcRGBFromHSL: convertHSLToRGB
+        calcRGBFromHSL: convertHSLToRGB,
+        toHexString: toHexString,
+        toRGBString: toRGBString,
+        toRGBAString: toRGBAString,
+        toHSLString: toHSLString,
+        toHSLAString: toHSLAString,
+        toString: toString
     };
 
     Color.parseType = parseType;
