@@ -25,6 +25,7 @@
  */
 // Using UMD from https://github.com/umdjs/umd/blob/master/returnExports.js
 (function (root, factory) {
+    /*globals define,module */
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define([], factory);
@@ -680,7 +681,9 @@
             throw new TypeError('Color string unable to be parsed: ' + str);
         }
 
+        /*jshint validthis:true */
         READ_MAP[type].call(this, match);
+        /*jshint validthis:false */
     }
 
     /**
@@ -692,6 +695,7 @@
      * @method validate
      */
     function validate() {
+        /*jshint validthis:true */
         this._red = clamp(this._red, 0, 255);
         this._green = clamp(this._green, 0, 255);
         this._blue = clamp(this._blue, 0, 255);
@@ -704,6 +708,7 @@
         this._hue = this._hue % 360;
         this._saturation = clamp(this._saturation, 0, 1);
         this._lightness = clamp(this._lightness, 0, 1);
+        /*jshint validthis:false */
     }
 
     /**
@@ -730,12 +735,14 @@
         blue = parseFloat(blue);
         alpha = parseFloat(alpha);
 
+        /*jshint validthis:true */
         this._red = red;
         this._green = green;
         this._blue = blue;
         this._alpha = alpha;
         validate.call(this);
         this.calcHSLFromRGB();
+        /*jshint validthis:false */
     }
 
     /**
@@ -762,6 +769,7 @@
         lightness = parseFloat(lightness) / 100;
         alpha = parseFloat(alpha);
 
+        /*jshint validthis:true */
         this._hue = hue;
         this._saturation = saturation;
         this._lightness = lightness;
@@ -772,6 +780,7 @@
 
         // Calculate the HSL
         this.calcRGBFromHSL();
+        /*jshint validthis:false */
     }
 
     /**
@@ -816,6 +825,7 @@
         blue = prepareTuple(blue);
         alpha = prepareTuple(alpha);
 
+        /*jshint validthis:true */
         // Convert over
         this._red = parseInt(red, 16);
         this._green = parseInt(green, 16);
@@ -827,6 +837,7 @@
 
         // Calculate the HSL value
         this.calcHSLFromRGB();
+        /*jshint validthis:false */
     }
 
     /**
@@ -840,7 +851,9 @@
     function readFromColor(match) {
         var rgbCode = COLOR_MAP[match[1]];
 
+        /*jshint validthis:true */
         readFromRGB.call(this, rgbCode.match(PARSER.RGB));
+        /*jshint validthis:false */
     }
 
     /**
@@ -851,9 +864,11 @@
      * @method calcHSLFromRGB
      */
     function convertRGBToHSL() {
+        /*jshint validthis:true */
         var red = this._red / 255;
         var green = this._green / 255;
         var blue = this._blue / 255;
+        /*jshint validthis:false */
 
         var min = Math.min(red, green, blue);
         var max = Math.max(red, green, blue);
@@ -899,9 +914,11 @@
             hue = hue * 360;
         }
 
+        /*jshint validthis:true */
         this._hue = hue;
         this._saturation = saturation;
         this._lightness = lightness;
+        /*jshint validthis:false */
     }
 
     /**
@@ -912,9 +929,11 @@
      * @method calcRGBFromHSL
      */
     function convertHSLToRGB() {
+        /*jshint validthis:true */
         var hue = this._hue / 360;
         var saturation = this._saturation;
         var lightness = this._lightness;
+        /*jshint validthis:false */
 
         var red = 0;
         var green = 0;
@@ -942,9 +961,11 @@
             blue = transformHueIntoColor(val1, val2, hue - (1/3));
         }
 
+        /*jshint validthis:true */
         this._red = Math.round(red * 255);
         this._green = Math.round(green * 255);
         this._blue = Math.round(blue * 255);
+        /*jshint validthis:false */
     }
 
     /**
@@ -1009,6 +1030,8 @@
             this.calcHSLFromRGB();
             return;
         }
+
+        /*jshint validthis:true */
         this.hydrate(str);
     }
 
@@ -1059,6 +1082,7 @@
      * @return {string}
      */
     function toString(type) {
+        /*jshint validthis:true */
         if (typeof type !== 'string') {
             return this.toHexString();
         }
@@ -1069,6 +1093,7 @@
         }
 
         return mappedStringMethod.call(this);
+        /*jshint validthis:false */
     }
 
     /**
@@ -1102,10 +1127,12 @@
      * @return {string}
      */
     function toHexString(shouldPremultiplyAlpha) {
+        /*jshint validthis:true */
         var red = this._red;
         var green = this._green;
         var blue = this._blue;
         var alpha = this._alpha;
+        /*jshint validthis:false */
 
         var str;
 
@@ -1133,10 +1160,12 @@
      * @return {string}
      */
     function toRGBString(shouldAllowFloatingPoint) {
+        /*jshint validthis:true */
         var alpha = this._alpha;
         var red = this._red * alpha;
         var green = this._green * alpha;
         var blue = this._blue * alpha;
+        /*jshint validthis:false */
 
         if (!shouldAllowFloatingPoint) {
             red = Math.round(red);
@@ -1157,10 +1186,12 @@
      * @return {string}
      */
     function toRGBAString(shouldAllowFloatingPoint) {
+        /*jshint validthis:true */
         var alpha = this._alpha;
         var red = this._red;
         var green = this._green;
         var blue = this._blue;
+        /*jshint validthis:false */
 
         if (!shouldAllowFloatingPoint) {
             red = Math.round(red);
@@ -1182,9 +1213,11 @@
      * @return {string}
      */
     function toHSLString(shouldAllowFloatingPoint) {
+        /*jshint validthis:true */
         var hue = this._hue;
         var saturation = this._saturation * 100;
         var lightness = this._lightness * 100;
+        /*jshint validthis:false */
 
         if (!shouldAllowFloatingPoint) {
             hue = Math.round(hue);
@@ -1206,10 +1239,12 @@
      * @return {string}
      */
     function toHSLAString(shouldAllowFloatingPoint) {
+        /*jshint validthis:true */
         var alpha = this._alpha;
         var hue = this._hue;
         var saturation = this._saturation * 100;
         var lightness = this._lightness * 100;
+        /*jshint validthis:false */
 
         if (!shouldAllowFloatingPoint) {
             hue = Math.round(hue);
