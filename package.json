@@ -1,6 +1,6 @@
 {
   "name": "Colors",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Transform HTML5 color strings",
   "main": "index.js",
   "repository": {
