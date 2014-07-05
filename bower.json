@@ -9,7 +9,7 @@
     "gulpfile.js",
     "package.json",
     "LICENSE",
-    "reports"
+    "reports",
     ".gitignore",
     ".jshintrc"
   ]
