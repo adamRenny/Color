@@ -1,5 +1,5 @@
 /**
- * The MIT License
+ * @license The MIT License
  *
  * Copyright (c) 2014 Adam Ranfelt
  *
