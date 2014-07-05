@@ -1,5 +1,5 @@
 {
-  "name": "color",
+  "name": "color-obj",
   "main": "dist/Color.js",
   "description": "A Color object to manage those pesky CSS color strings",
   "licence": "MIT",
