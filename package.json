@@ -22,6 +22,7 @@
   "homepage": "https://github.com/adamRenny/Color",
   "devDependencies": {
     "gulp": "^3.8.5",
+    "gulp-plato": "^0.2.1",
     "gulp-uglify": "^0.3.1",
     "karma": "^0.12.16",
     "karma-coverage": "^0.2.4",
